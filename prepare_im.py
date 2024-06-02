@@ -197,13 +197,14 @@ def create_pairs(out_dir, cameras, images, pts, args):
 
                 matches_12 = out_12['matches0'][0].detach().cpu().numpy()
 
-
-
                 idxs = []
 
                 for idx_1, idx_2 in enumerate(matches_12):
                     if idx_2 != -1:
                         idxs.append((idx_1, idx_2))
+
+                if len(idxs) < 20:
+                    continue
 
                 out_array = np.empty([len(idxs), 5])
 
