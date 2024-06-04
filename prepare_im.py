@@ -3,16 +3,15 @@ import os
 import random
 from pathlib import Path
 
-import cv2
 import h5py
-import joblib
 import numpy as np
 import torch
 from scipy.spatial.transform import Rotation
 from tqdm import tqdm
 import lightglue
-from lightglue.utils import load_image, rbd
+from lightglue.utils import load_image
 
+from utils.matching import get_area, get_matcher_string, get_extractor
 from utils.read_write_colmap import cam_to_K, read_model
 
 
@@ -28,12 +27,6 @@ def parse_args():
     parser.add_argument('dataset_path')
 
     return parser.parse_args()
-
-
-def get_area(pts):
-    width = np.max(pts[:, 0]) - np.min(pts[:, 0])
-    height = np.max(pts[:, 1]) - np.min(pts[:, 1])
-    return width * height
 
 
 def create_gt_h5(cameras, images, out_dir, args):
@@ -67,26 +60,6 @@ def create_gt_h5(cameras, images, out_dir, args):
         fK.create_dataset(name, shape=(3, 3), data=K)
         fH.create_dataset(f'{name}-hwK', shape=(3, 3), data=hwK)
 
-
-def get_matcher_string(args):
-    if args.resize is None:
-        resize_str = 'noresize'
-    else:
-        resize_str = str(args.resize)
-
-    return f'features_{args.features}_{resize_str}_{args.max_features}'
-
-def get_extractor(args):
-    if args.features == 'superpoint':
-        extractor = lightglue.SuperPoint(max_num_keypoints=args.max_features).eval().cuda()
-    elif args.features == 'disk':
-        extractor = lightglue.DISK(max_num_keypoints=args.max_features).eval().cuda()
-    elif args.features == 'sift':
-        extractor = lightglue.SIFT(max_num_keypoints=args.max_features).eval().cuda()
-    else:
-        raise NotImplementedError
-
-    return extractor
 
 def extract_features(img_dir_path, images, cameras, out_dir, args):
     # extractor = lightglue.SuperPoint(max_num_keypoints=2048).eval().cuda()

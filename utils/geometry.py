@@ -1,6 +1,6 @@
 import h5py
 import numpy as np
-
+import cv2
 
 def angle(x, y):
     x = x.ravel()
@@ -165,7 +165,7 @@ def pose_from_F(F, K1, K2, kp1, kp2):
 
         _, R, t, mask = cv2.recoverPose(E, kp1_unproj, kp2_unproj)
     except:
-        # print("Pose exception!")
+        print("Pose exception!")
         return np.eye(3), np.ones(3)
 
     return R, t
