@@ -143,8 +143,9 @@ def create_pairs(out_dir, images, pts, args):
 
     matcher = lightglue.LightGlue(features=args.features).eval().cuda()
 
+    name_str = f'pairs-{get_matcher_string(args)}-LG'
+
     if args.num_samples is None or not args.equal:
-        name_str = f'pairs-{get_matcher_string(args)}-LG'
         h5_path = os.path.join(out_dir, f'{name_str}.h5')
         h5_file = h5py.File(h5_path, 'w')
         pairs = []
