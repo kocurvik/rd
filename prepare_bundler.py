@@ -148,8 +148,7 @@ def create_pairs(out_dir, images, pts, args):
         h5_path = os.path.join(out_dir, f'{name_str}.h5')
         h5_file = h5py.File(h5_path, 'w')
         pairs = []
-
-    print("Writing matches to: ", h5_path)
+        print("Writing matches to: ", h5_path)
 
     if args.equal:
         h5_path_eq = os.path.join(out_dir, f'{name_str}_eq.h5')
