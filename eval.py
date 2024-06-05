@@ -126,7 +126,7 @@ def eval_experiment(x):
         info['runtime'] = 1000 * (perf_counter() - start)
         F_est = F_cam.F
         k1_est = F_cam.camera.params[-1]
-        # k1_est = 0.0
+    # k1_est = 0.0
         k2_est = k1_est
     elif solver == 'F':
         rd_vals = [0.0]
@@ -225,6 +225,9 @@ def draw_cumplots(experiments, results, eq_only=False):
     plt.xlabel('Pose error')
     plt.ylabel('Portion of samples')
 
+    # results = [r for r in results if r['k2_gt'] < -0.5 or r['k1_gt'] < -0.5]
+    # results = [r for r in results if r['k2_gt'] < -1.0]
+
     for exp in experiments:
         exp_results = [x for x in results if x['experiment'] == exp]
 
@@ -232,6 +235,9 @@ def draw_cumplots(experiments, results, eq_only=False):
             exp_results = [x for x in exp_results if x['k1_gt'] == x['k2_gt']]# and x['K1_gt'] == x['K2_gt']]
         else:
             exp_results = [x for x in exp_results if x['k1_gt'] != x['k2_gt']]  # and x['K1_gt'] == x['K2_gt']]
+
+        # print(np.nanmedian([r['k2'] for r in exp_results]))
+        # print(len(exp_results))
 
         lo = 'kFk' if 'kFk' in exp or 'eq' in exp else 'k2Fk1'
         exp_name = exp.replace('_', ' ').replace('eq','')
@@ -324,11 +330,7 @@ def eval(args):
         with open(os.path.join('results', f'{basename}-{matches_basename}{s_string}.json'), 'r') as f:
             results = json.load(f)
 
-
     else:
-
-
-
         R_file = h5py.File(os.path.join(dataset_path, 'R.h5'))
         T_file = h5py.File(os.path.join(dataset_path, 'T.h5'))
         P_file = h5py.File(os.path.join(dataset_path, 'parameters_rd.h5'))
@@ -364,9 +366,6 @@ def eval(args):
                 kp1 = matches[:, :2]
                 kp2 = matches[:, 2:4]
 
-                if len(kp1) < 10:
-                    continue
-
                 # F, info = poselib.estimate_fundamental(kp1, kp2)
                 # R, t = pose_from_F(F, K1, K2, kp1, kp2)
                 #
@@ -374,6 +373,11 @@ def eval(args):
 
                 # kp1 = kp1[matches[:, 4] <= 0.8]
                 # kp2 = kp2[matches[:, 4] <= 0.8]
+                kp1 = kp1[matches[:, 4] > 0.5]
+                kp2 = kp2[matches[:, 4] > 0.5]
+
+                if len(kp1) < 10:
+                    continue
 
                 kp1_normalized, T1 = normalize(kp1, w_dict[img_name_1], h_dict[img_name_1])
                 kp2_normalized, T2 = normalize(kp2, w_dict[img_name_2], h_dict[img_name_2])
