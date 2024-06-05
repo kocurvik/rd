@@ -191,7 +191,7 @@ def create_pairs(out_dir, images, pts, args):
                 if label in h5_file_eq:
                     continue
 
-            if args.num_samples is None and args.equal:
+            if args.num_samples is not None and args.equal:
                 if img_1['calibration_group'] != img_2['calibration_group'] or img_1['calibration_group'] == -1 or img_2['calibration_group'] == -1:
                     continue
 
