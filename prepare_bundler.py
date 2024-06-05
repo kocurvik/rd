@@ -155,7 +155,7 @@ def create_pairs(out_dir, images, pts, args):
         h5_path_eq = os.path.join(out_dir, f'{name_str}_eq.h5')
         h5_file_eq = h5py.File(h5_path_eq, 'w')
         pairs_eq = []
-        print("Writing eq matches to: ", h5_path)
+        print("Writing eq matches to: ", h5_path_eq)
 
     id_list = list(range(len(images)))
 
