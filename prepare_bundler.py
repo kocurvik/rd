@@ -192,7 +192,7 @@ def create_pairs(out_dir, images, pts, args):
                     continue
 
             if args.num_samples is None and args.equal:
-                if args.equal and (img_1['calibration_group'] != img_2['calibration_group'] or img_1['calibration_group'] == -1 or img_2['calibration_group'] == -1):
+                if img_1['calibration_group'] != img_2['calibration_group'] or img_1['calibration_group'] == -1 or img_2['calibration_group'] == -1:
                     continue
 
 
