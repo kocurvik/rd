@@ -426,11 +426,11 @@ def eval(args):
 
     print("Printing results for all combinations")
     print_results(experiments, results)
-    # draw_cumplots(experiments, results)
+    draw_cumplots(experiments, results)
 
     print("Printing results for pairs with equal intrinsics")
     print_results(experiments, results, eq_only=True)
-    # draw_cumplots(experiments, results, eq_only=True)
+    draw_cumplots(experiments, results, eq_only=True)
 
     if args.graph:
         draw_results(results, experiments, iterations_list)
