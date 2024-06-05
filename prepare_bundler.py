@@ -4,6 +4,7 @@ import os
 import random
 from pathlib import Path
 import xml.etree.ElementTree as ET
+import ntpath
 
 import cv2
 import h5py
@@ -58,10 +59,10 @@ def create_gt_h5(images, out_dir, args):
         K = image['K']
         k_rd = image['k_rd']
 
-        hwK = np.array([[w, 0, w/2], [0, h, h/2], [0, 0, k_rd]])
+        hwK = np.array([[w, 0, w / 2], [0, h, h / 2], [0, 0, k_rd]])
 
         fR.create_dataset(name, shape=(3, 3), data=R)
-        fT.create_dataset(name, shape=(3, 1), data=t.reshape(3,1))
+        fT.create_dataset(name, shape=(3, 1), data=t.reshape(3, 1))
         fK.create_dataset(name, shape=(3, 3), data=K)
         fH.create_dataset(f'{name}-hwK', shape=(3, 3), data=hwK)
 
@@ -79,10 +80,9 @@ def extract_features(img_dir_path, images, out_dir, args):
     feature_dict = {}
 
     for img_id, img in tqdm(enumerate(images), total=len(images)):
-        img_path = os.path.join(img_dir_path, img['filename'])
+        img_path = os.path.join(img_dir_path, img['filename'].replace('\\', os.sep))
         name = img['name']
         image_tensor = load_image(img_path).cuda()
-
 
         if img['width'] != image_tensor.size(-1):
             if img['width'] == image_tensor.size(-2):
@@ -107,7 +107,6 @@ def get_overlap_areas(images, pts, img_ids):
 
     img_1_point3D_ids = np.array(img_1['points'])
     img_2_point3D_ids = np.array(img_2['points'])
-
 
     overlap = set(img_1_point3D_ids).intersection(set(img_2_point3D_ids))
 
@@ -143,10 +142,12 @@ def create_pairs(out_dir, images, pts, args):
     features = torch.load(os.path.join(out_dir, f"{get_matcher_string(args)}.pt"))
 
     matcher = lightglue.LightGlue(features=args.features).eval().cuda()
-    name_str = f'pairs-{get_matcher_string(args)}-LG'
-    h5_path = os.path.join(out_dir, f'{name_str}.h5')
-    h5_file = h5py.File(h5_path, 'w')
-    pairs = []
+
+    if args.num_samples is None or not args.equal:
+        name_str = f'pairs-{get_matcher_string(args)}-LG'
+        h5_path = os.path.join(out_dir, f'{name_str}.h5')
+        h5_file = h5py.File(h5_path, 'w')
+        pairs = []
 
     print("Writing matches to: ", h5_path)
 
@@ -155,7 +156,6 @@ def create_pairs(out_dir, images, pts, args):
         h5_file_eq = h5py.File(h5_path_eq, 'w')
         pairs_eq = []
         print("Writing eq matches to: ", h5_path)
-
 
     id_list = list(range(len(images)))
 
@@ -184,8 +184,18 @@ def create_pairs(out_dir, images, pts, args):
             # if 'GO' in img_1['filename'] or 'GO' in img_2['filename']:
             #     continue
 
-            if label in h5_file:
-                continue
+            if args.num_samples is None or not args.equal:
+                if label in h5_file:
+                    continue
+            else:
+                if label in h5_file_eq:
+                    continue
+
+            if args.num_samples is None and args.equal:
+                if args.equal and img_1['calibration_group'] != img_2['calibration_group'] or img_1['calibration_group'] == -1 or img_2['calibration_group'] == -1:
+                    continue
+
+
 
             if not img_1['name'] in features.keys() or not img_2['name'] in features.keys():
                 continue
@@ -219,10 +229,12 @@ def create_pairs(out_dir, images, pts, args):
                     score_12 = scores_12[idx_1]
                     out_array[i] = np.array([*point_1, *point_2, score_12])
 
-                h5_file.create_dataset(label, shape=out_array.shape, data=out_array)
-                pairs.append(label.replace('-', ' '))
+                if args.num_samples is None or not args.equal:
+                    h5_file.create_dataset(label, shape=out_array.shape, data=out_array)
+                    pairs.append(label.replace('-', ' '))
 
-                if args.equal and img_1['calibration_group'] == img_2['calibration_group'] and img_1['calibration_group'] != -1:
+                if args.equal and img_1['calibration_group'] == img_2['calibration_group'] and img_1[
+                    'calibration_group'] != -1:
                     h5_file_eq.create_dataset(label, shape=out_array.shape, data=out_array)
                     pairs_eq.append(label.replace('-', ' '))
 
@@ -230,16 +242,18 @@ def create_pairs(out_dir, images, pts, args):
                     pbar.update(1)
                     output += 1
 
-    pairs_txt_path = os.path.join(out_dir, f'{name_str}.txt')
-    print("Writing list of pairs to: ", pairs_txt_path)
-    with open(pairs_txt_path, 'w') as f:
-        f.writelines(line + '\n' for line in pairs)
+    if args.num_samples is None or not args.equal:
+        pairs_txt_path = os.path.join(out_dir, f'{name_str}.txt')
+        print("Writing list of pairs to: ", pairs_txt_path)
+        with open(pairs_txt_path, 'w') as f:
+            f.writelines(line + '\n' for line in pairs)
 
     if args.equal:
         pairs_txt_path = os.path.join(out_dir, f'{name_str}_eq.txt')
         print("Writing list of eq pairs to: ", pairs_txt_path)
         with open(pairs_txt_path, 'w') as f:
             f.writelines(line + '\n' for line in pairs_eq)
+
 
 def get_calib_params(x):
     focal = x[0]
@@ -254,6 +268,7 @@ def get_calib_params(x):
 
     K = np.array([[focal, 0, cx], [0, focal, cy], [0, 0, 1]])
     return K, k_rd, w, h
+
 
 def read_bundler(bundler_path, rc_path, img_path, img_list_path=None):
     with open(bundler_path, 'r') as f:
@@ -274,11 +289,12 @@ def read_bundler(bundler_path, rc_path, img_path, img_list_path=None):
     rc_filenames = []
 
     for element in root[idx]:
-        p = os.path.normpath(element.attrib['fileName'])
-        if p.split(os.sep)[-2] == os.path.basename(img_path):
-            filename = os.path.basename(p)
+        p = ntpath.normpath(element.attrib['fileName'])
+
+        if p.split('\\')[-2] == ntpath.basename(img_path):
+            filename = ntpath.basename(p)
         else:
-            filename = os.path.join(p.split(os.sep)[-2], p.split(os.sep)[-1])
+            filename = ntpath.join(p.split('\\')[-2], p.split('\\')[-1])
 
         rc_filenames.append(filename)
         try:
@@ -288,7 +304,6 @@ def read_bundler(bundler_path, rc_path, img_path, img_list_path=None):
             img_data[filename] = {'calibration_group': -1,
                                   'distortion_group': -1}
 
-
     if img_list_path is None:
         # we are assuming all images were used for the given component
         img_list = rc_filenames
@@ -297,11 +312,11 @@ def read_bundler(bundler_path, rc_path, img_path, img_list_path=None):
             l = f.readlines()
         img_list = []
         for line in l:
-            p = os.path.normpath(line.strip())
-            if p.split(os.sep)[-2] == os.path.basename(img_path):
-                img_list.append(os.path.basename(line).strip())
+            p = ntpath.normpath(line.strip())
+            if p.split('\\')[-2] == ntpath.basename(img_path):
+                img_list.append(ntpath.basename(line).strip())
             else:
-                img_list.append(os.path.join(p.split(os.sep)[-2], p.split(os.sep)[-1]))
+                img_list.append(ntpath.join(p.split('\\')[-2], p.split('\\')[-1]))
 
     assert len(img_list) == num_images
     print(f"Loaded: {len(img_data)} from {rc_path}")
@@ -372,7 +387,6 @@ def get_paths(dataset_path):
     return bundler_path, rc_path, img_path, img_list_path
 
 
-
 def prepare_single(args):
     dataset_path = Path(args.dataset_path)
 
@@ -387,6 +401,7 @@ def prepare_single(args):
     create_gt_h5(images, out_dir, args)
     extract_features(img_path, images, out_dir, args)
     create_pairs(out_dir, images, points, args)
+
 
 if __name__ == '__main__':
     args = parse_args()

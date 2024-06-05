@@ -87,7 +87,7 @@ def plot_scene(points, R, t, f, width=640, height=480, color_1='black', color_2=
     plt.title(name)
 
 
-def get_scene(f, k1, k2, R, t, num_pts, X=None, min_distance=1, depth=1, width=640, height=480, sigma_p=0.0, plot=None, seed=None):
+def get_scene(f, k1, k2, R, t, num_pts, X=None, min_distance=1, depth=1, width=1, height=1, sigma_p=0.0, plot=None, seed=None):
     if seed is not None:
         np.random.seed(seed)
     K = np.diag([f, f, 1])
@@ -125,10 +125,10 @@ def get_scene(f, k1, k2, R, t, num_pts, X=None, min_distance=1, depth=1, width=6
 
 
 def run_synth():
-    f = 1200
+    f = 1.0
     gt_K = np.diag([f, f, 1.0])
-    k1 = 5e-7
-    k2 = 5e-8
+    k1 = -0.5
+    k2 = -0.5
     rd_vals = [1e-7, 1e-8, 1e-9, 0.0]
     rd_vals = []
 
@@ -156,8 +156,8 @@ def run_synth():
         for _ in tqdm(range(10)):
             x1, x2, X = get_scene(f, k1, k2, R, t, 100)
 
-            xx1 = x1 + sigma * np.random.randn(*(x1.shape))
-            xx2 = x2 + sigma * np.random.randn(*(x1.shape))
+            xx1 = x1 + sigma * np.random.randn(*(x1.shape)) / 1000
+            xx2 = x2 + sigma * np.random.randn(*(x1.shape)) / 1000
 
             # idxs1 = np.random.permutation(np.arange(30))
             # xx1[:30] = xx1[idxs1]
