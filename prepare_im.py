@@ -1,4 +1,6 @@
 import argparse
+import itertools
+import ntpath
 import os
 import random
 from pathlib import Path
@@ -17,7 +19,7 @@ from utils.read_write_colmap import cam_to_K, read_model
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--num_samples', type=int, default=200)
+    parser.add_argument('-n', '--num_samples', type=int, default=None)
     parser.add_argument('-s', '--seed', type=int, default=100)
     parser.add_argument('-f', '--features', type=str, default='superpoint')
     parser.add_argument('-mf', '--max_features', type=int, default=2048)
@@ -44,7 +46,7 @@ def create_gt_h5(cameras, images, out_dir, args):
 
     for img_id, img in images.items():
         camera = cameras[img.camera_id]
-        name = img.name.split('.')[0]
+        name = ntpath.normpath(img.name).split('.')[0]
         q = img.qvec
         t = img.tvec
         R = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
@@ -75,8 +77,8 @@ def extract_features(img_dir_path, images, cameras, out_dir, args):
     feature_dict = {}
 
     for img_id, img in tqdm(images.items()):
-        img_path = os.path.join(img_dir_path, img.name)
-        name = img.name.split('.')[0]
+        img_path = os.path.join(img_dir_path, ntpath.normpath(img.name)).replace('//', os.sep)
+        name = ntpath.normpath(img.name).split('.')[0]
         image_tensor = load_image(img_path).cuda()
         cam = cameras[img.camera_id]
 
@@ -149,10 +151,28 @@ def create_pairs(out_dir, cameras, images, pts, args):
 
     print("Writing matches to: ", h5_path)
 
-    with tqdm(total=args.num_samples) as pbar:
-        while output < args.num_samples:
-            img_ids = random.sample(list(images.keys()), 2)
-            label = '-'.join([images[x].name.split('.')[0] for x in img_ids])
+    id_list = list([k for k,v in images.items()])
+
+    if args.num_samples is None:
+        img_ids_list = list(itertools.combinations(id_list, 2))
+        total = len(img_ids_list)
+    else:
+        total = args.num_samples
+
+    all_counter = 0
+
+    with tqdm(total=total) as pbar:
+        while output < total:
+            if args.num_samples is not None:
+                img_ids = random.sample(id_list, 2)
+            else:
+                if all_counter >= len(img_ids_list):
+                    break
+                img_ids = img_ids_list[all_counter]
+                all_counter += 1
+                pbar.update(1)
+
+            label = '-'.join([ntpath.normpath(images[x].name).split('.')[0] for x in img_ids])
 
             if label in h5_file:
                 continue
@@ -161,8 +181,8 @@ def create_pairs(out_dir, cameras, images, pts, args):
             if area_1 > 0.1 and area_2 > 0.1:
                 img_1, img_2 = (images[x] for x in img_ids)
 
-                feats_1 = features[img_1.name.split(".")[0]]
-                feats_2 = features[img_2.name.split(".")[0]]
+                feats_1 = features[ntpath.normpath(img_1.name).split(".")[0]]
+                feats_2 = features[ntpath.normpath(img_2.name).split(".")[0]]
 
                 out_12 = matcher({'image0': feats_1, 'image1': feats_2})
 
@@ -190,14 +210,15 @@ def create_pairs(out_dir, cameras, images, pts, args):
 
                 h5_file.create_dataset(label, shape=out_array.shape, data=out_array)
                 triplets.append(label.replace('-', ' '))
-                pbar.update(1)
-                output += 1
+
+                if args.num_samples is not None:
+                    pbar.update(1)
+                    output += 1
 
     pairs_txt_path = os.path.join(out_dir, f'pairs-{get_matcher_string(args)}-LG.txt')
     print("Writing list of pairs to: ", pairs_txt_path)
     with open(pairs_txt_path, 'w') as f:
         f.writelines(line + '\n' for line in triplets)
-
 
 
 def prepare_single(args, subset):
@@ -227,6 +248,9 @@ def get_dataset_paths(basename, dataset_path, subset):
     elif 'aachen' in basename.lower():
         model_path = os.path.join(subset_path, '3D-models/aachen_v_1_1')
         img_path = os.path.join(subset_path, 'images_upright')
+    elif 'multiview_undistorted' in basename.lower():
+        model_path = os.path.join(subset_path, 'dslr_calibration_undistorted')
+        img_path = os.path.join(subset_path, 'images')
     else:
         model_path = os.path.join(subset_path, 'sfm')
         img_path = os.path.join(subset_path, 'images_full')
