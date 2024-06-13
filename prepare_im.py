@@ -77,7 +77,7 @@ def extract_features(img_dir_path, images, cameras, out_dir, args):
     feature_dict = {}
 
     for img_id, img in tqdm(images.items()):
-        img_path = os.path.join(img_dir_path, ntpath.normpath(img.name)).replace('//', os.sep)
+        img_path = os.path.join(img_dir_path, img.name)
         name = ntpath.normpath(img.name).split('.')[0]
         image_tensor = load_image(img_path).cuda()
         cam = cameras[img.camera_id]
