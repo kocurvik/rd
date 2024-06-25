@@ -100,7 +100,7 @@ def extract_features(img_dir_path, images, out_dir, args):
     print("Features saved to: ", out_path)
 
 
-def get_overlap_areas(images, pts, img_ids):
+def get_overlap_areas(images, pts, img_ids, return_keypoints=False):
     img_id1, img_id2 = img_ids
     imgs = list(images[x] for x in img_ids)
     img_1, img_2 = imgs
@@ -111,7 +111,7 @@ def get_overlap_areas(images, pts, img_ids):
     overlap = set(img_1_point3D_ids).intersection(set(img_2_point3D_ids))
 
     if len(overlap) < 5:
-        return 0.0, 0.0
+        return 0.0, 0.0, [], []
 
     pts_img_1 = []
     pts_img_2 = []
@@ -131,7 +131,110 @@ def get_overlap_areas(images, pts, img_ids):
     area_1 = get_area(pts_img_1) / (img_1['width'] * img_1['height'])
     area_2 = get_area(pts_img_2) / (img_2['width'] * img_2['height'])
 
+    if return_keypoints:
+        return area_1, area_2, pts_img_1, pts_img_2
+
     return area_1, area_2
+
+def create_gt_pairs(out_dir, images, pts, args):
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+    output = 0
+    name_str = f'pairs-gt'
+
+    if args.num_samples is None or not args.equal:
+        h5_path = os.path.join(out_dir, f'{name_str}.h5')
+        if os.path.exists(h5_path):
+            print("GT pairs already exist, not creating them anew")
+            return
+        h5_file = h5py.File(h5_path, 'w')
+        pairs = []
+        print("Writing gt matches to: ", h5_path)
+
+    if args.equal:
+        h5_path_eq = os.path.join(out_dir, f'{name_str}_eq.h5')
+        if os.path.exists(h5_path_eq):
+            print("GT pairs already exist, not creating them anew")
+            return
+        h5_file_eq = h5py.File(h5_path_eq, 'w')
+        pairs_eq = []
+        print("Writing eq gt matches to: ", h5_path_eq)
+
+    id_list = list(range(len(images)))
+
+    if args.num_samples is None:
+        img_ids_list = list(itertools.combinations(id_list, 2))
+        total = len(img_ids_list)
+    else:
+        total = args.num_samples
+
+    all_counter = 0
+
+    with tqdm(total=total) as pbar:
+        while output < total:
+            if args.num_samples is not None:
+                img_ids = random.sample(id_list, 2)
+            else:
+                if all_counter >= len(img_ids_list):
+                    break
+                img_ids = img_ids_list[all_counter]
+                all_counter += 1
+                pbar.update(1)
+
+            label = '-'.join([images[x]['name'] for x in img_ids])
+            img_1, img_2 = (images[x] for x in img_ids)
+
+            if args.num_samples is None or not args.equal:
+                if label in h5_file:
+                    continue
+            else:
+                if label in h5_file_eq:
+                    continue
+
+            if args.num_samples is not None and args.equal:
+                if img_1['calibration_group'] != img_2['calibration_group'] or img_1['calibration_group'] == -1 or \
+                        img_2['calibration_group'] == -1:
+                    continue
+
+            area_1, area_2, kp1, kp2 = get_overlap_areas(images, pts, img_ids, return_keypoints=True)
+            if area_1 > 0.1 and area_2 > 0.1:
+                if len(kp1) < 20:
+                    continue
+
+                out_array = np.column_stack([kp1, kp2, np.ones(len(kp1))])
+                out_array[:, 0] += img_1['width'] / 2
+                out_array[:, 1] *= -1
+                out_array[:, 1] += img_1['height'] / 2
+
+                out_array[:, 2] += img_2['width'] / 2
+                out_array[:, 3] *= -1
+                out_array[:, 3] += img_2['height'] / 2
+
+
+                if args.num_samples is None or not args.equal:
+                    h5_file.create_dataset(label, shape=out_array.shape, data=out_array)
+                    pairs.append(label.replace('-', ' '))
+
+                if args.equal and img_1['calibration_group'] == img_2['calibration_group'] and img_1[
+                    'calibration_group'] != -1:
+                    h5_file_eq.create_dataset(label, shape=out_array.shape, data=out_array)
+                    pairs_eq.append(label.replace('-', ' '))
+
+                if args.num_samples is not None:
+                    pbar.update(1)
+                    output += 1
+
+    if args.num_samples is None or not args.equal:
+        pairs_txt_path = os.path.join(out_dir, f'{name_str}.txt')
+        print("Writing list of pairs to: ", pairs_txt_path)
+        with open(pairs_txt_path, 'w') as f:
+            f.writelines(line + '\n' for line in pairs)
+
+    if args.equal:
+        pairs_txt_path = os.path.join(out_dir, f'{name_str}_eq.txt')
+        print("Writing list of eq pairs to: ", pairs_txt_path)
+        with open(pairs_txt_path, 'w') as f:
+            f.writelines(line + '\n' for line in pairs_eq)
 
 
 def create_pairs(out_dir, images, pts, args):
@@ -399,6 +502,7 @@ def prepare_single(args):
         os.makedirs(out_dir)
 
     create_gt_h5(images, out_dir, args)
+    create_gt_pairs(out_dir, images, points, args)
     extract_features(img_path, images, out_dir, args)
     create_pairs(out_dir, images, points, args)
 
