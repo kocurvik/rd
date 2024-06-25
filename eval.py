@@ -15,6 +15,7 @@ import cv2
 from utils.geometry import rotation_angle, angle
 from utils.geometry import get_camera_dicts, undistort, distort, recover_pose_from_fundamental, bougnoux_original, \
     get_K, pose_from_F
+from utils.rand import get_random_rd_distribution
 
 
 def parse_args():
@@ -24,7 +25,7 @@ def parse_args():
     parser.add_argument('-l', '--load', action='store_true', default=False)
     parser.add_argument('-g', '--graph', action='store_true', default=False)
     parser.add_argument('-s', '--synth', action='store_true', default=False)
-    parser.add_argument('-e', '--syntheq', action='store_true', default=False)
+    parser.add_argument('-e', '--eq', action='store_true', default=False)
     parser.add_argument('feature_file')
     parser.add_argument('dataset_path')
 
@@ -47,8 +48,8 @@ def normalize(kp, width, height):
 
 
 def k_err(k_gt, k_est):
-    return abs((1 / (1 + k_gt)) - (1 /(1 + k_est))) / abs(( 1 / (1 + k_gt)))
-
+    # return abs((1 / (1 + k_gt)) - (1 /(1 + k_est))) / abs(( 1 / (1 + k_gt)))
+    return np.abs(k_gt - k_est)
 
 
 def get_result_dict(info, kp1_distorted, kp2_distorted, F_est, k1_est, k2_est, k1_gt, k2_gt, R_gt, t_gt, K1, K2, T1, T2):
@@ -89,6 +90,7 @@ def get_result_dict(info, kp1_distorted, kp2_distorted, F_est, k1_est, k2_est, k
     out['k2'] = k2_est
     out['k2_gt'] = k2_gt
 
+    info['inliers'] = []
     out['info'] = info
 
     return out
@@ -107,7 +109,7 @@ def eval_experiment(x):
 
     if iters is None:
         ransac_dict = {'max_iterations': 10000, 'max_epipolar_error': 3.0 / mean_scale, 'progressive_sampling': False,
-                       'min_iterations': 100}
+                       'min_iterations': 100, 'lo_iterations': 25}
     else:
         ransac_dict = {'max_iterations': iters, 'max_epipolar_error': 3.0 / mean_scale, 'progressive_sampling': False,
                        'min_iterations': iters}
@@ -115,7 +117,7 @@ def eval_experiment(x):
     if solver == 'Feq':
         rd_vals = [0.0]
         if 's3' in experiment:
-            rd_vals = [0.0, -0.4, -0.8]
+            rd_vals = [0.0, -0.6, -1.2]
 
         start = perf_counter()
         F_cam, info = poselib.estimate_kFk(kp1_distorted, kp2_distorted, rd_vals, use_undistorted, False, ransac_dict,
@@ -131,7 +133,7 @@ def eval_experiment(x):
     elif solver == 'F':
         rd_vals = [0.0]
         if 's3' in experiment:
-            rd_vals = [0.0, -0.4, -0.8]
+            rd_vals = [0.0, -0.6, -1.2]
 
         start = perf_counter()
         F_cam, info = poselib.estimate_k2Fk1(kp1_distorted, kp2_distorted, rd_vals, use_undistorted, False, ransac_dict,
@@ -225,7 +227,7 @@ def draw_cumplots(experiments, results, eq_only=False):
     plt.xlabel('Pose error')
     plt.ylabel('Portion of samples')
 
-    # results = [r for r in results if r['k2_gt'] < -0.5 or r['k1_gt'] < -0.5]
+    results = [r for r in results if r['k2_gt'] < -0.5 or r['k1_gt'] < -0.5]
     # results = [r for r in results if r['k2_gt'] < -1.0]
 
     for exp in experiments:
@@ -304,10 +306,14 @@ def draw_results(results, experiments, iterations_list):
 
 
 def eval(args):
-    experiments = ['Feq_7pt', 'Feq_7pt_s3',
-                   'kFk_8pt', 'kFk_9pt',
-                   'k2k1_9pt', 'k2Fk1_10pt',
-                   'F_7pt', 'F_7pt_s3']
+    if args.eq:
+        experiments = ['Feq_7pt', 'Feq_7pt_s3',
+                       'kFk_8pt', 'kFk_9pt',
+                       'k2k1_9pt', 'k2Fk1_10pt',
+                       'F_7pt', 'F_7pt_s3']
+    else:
+        experiments = ['k2k1_9pt', 'k2Fk1_10pt',
+                       'F_7pt', 'F_7pt_s3']
 
     dataset_path = args.dataset_path
     basename = os.path.basename(dataset_path)
@@ -320,14 +326,16 @@ def eval(args):
     else:
         iterations_list = [None]
 
-    if args.load:
-        s_string = ""
-        if args.synth:
-            s_string = "-synth"
-            if args.syntheq:
-                s_string = "-syntheq"
 
-        with open(os.path.join('results', f'{basename}-{matches_basename}{s_string}.json'), 'r') as f:
+    s_string = ""
+    if args.synth:
+        s_string = "-synth"
+        if args.eq:
+            s_string = "-syntheq"
+    json_string = f'{basename}-{matches_basename}{s_string}.json'
+
+    if args.load:
+        with open(os.path.join('results', json_string), 'r') as f:
             results = json.load(f)
 
     else:
@@ -347,6 +355,8 @@ def eval(args):
 
         if args.first is not None:
             pairs = pairs[:args.first]
+
+        dist = get_random_rd_distribution()
 
         def gen_data():
             for img_name_1, img_name_2 in pairs:
@@ -371,10 +381,12 @@ def eval(args):
                 #
                 # print(angle(t,t_gt), info['inlier_ratio'])
 
-                # kp1 = kp1[matches[:, 4] <= 0.8]
-                # kp2 = kp2[matches[:, 4] <= 0.8]
-                kp1 = kp1[matches[:, 4] > 0.5]
-                kp2 = kp2[matches[:, 4] > 0.5]
+                # use only when sift matches are used
+                # if 'sift' in args.feature_file.lower():
+                #     kp1 = kp1[matches[:, 4] <= 0.8]
+                #     kp2 = kp2[matches[:, 4] <= 0.8]
+                # kp1 = kp1[matches[:, 4] > 0.5]
+                # kp2 = kp2[matches[:, 4] > 0.5]
 
                 if len(kp1) < 10:
                     continue
@@ -383,11 +395,11 @@ def eval(args):
                 kp2_normalized, T2 = normalize(kp2, w_dict[img_name_2], h_dict[img_name_2])
 
                 if args.synth:
-                    k1 = -np.random.rand()
-                    if args.syntheq:
+                    k1 = dist()[0]
+                    if args.eq:
                         k2 = k1
                     else:
-                        k2 = -np.random.rand()
+                        k2 = dist()[0]
 
                     kp1_distorted = distort(kp1_normalized, k1)
                     kp2_distorted = distort(kp2_normalized, k2)
@@ -414,12 +426,7 @@ def eval(args):
 
         os.makedirs('results', exist_ok=True)
 
-        s_string = ""
-        if args.synth:
-            s_string = "-synth"
-            if args.syntheq:
-                s_string = "-syntheq"
-        with open(os.path.join('results', f'{basename}-{matches_basename}{s_string}.json'), 'w') as f:
+        with open(os.path.join('results', json_string), 'w') as f:
             json.dump(results, f)
 
         print("Done")
