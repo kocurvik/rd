@@ -111,7 +111,10 @@ def get_overlap_areas(images, pts, img_ids, return_keypoints=False):
     overlap = set(img_1_point3D_ids).intersection(set(img_2_point3D_ids))
 
     if len(overlap) < 5:
-        return 0.0, 0.0, [], []
+        if return_keypoints:
+            return 0.0, 0.0, [], []
+        else:
+            return 0.0, 0.0
 
     pts_img_1 = []
     pts_img_2 = []
