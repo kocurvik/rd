@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('-nw', '--num_workers', type=int, default=1)
     parser.add_argument('-l', '--load', action='store_true', default=False)
     parser.add_argument('-g', '--graph', action='store_true', default=False)
-    parser.add_argument('-s', '--synth', action='store_true', default=False)
+    parser.add_argument('-s', '--synth', type=int, default=0)
     parser.add_argument('-e', '--eq', action='store_true', default=False)
     parser.add_argument('-a', '--append', action='store_true', default=False)
     parser.add_argument('feature_file')
@@ -99,7 +99,7 @@ def get_result_dict(info, kp1_distorted, kp2_distorted, F_est, k1_est, k2_est, k
 
 
 def eval_experiment(x):
-    iters, experiment, kp1_distorted, kp2_distorted, k1, k2, R_gt, t_gt, T1, T2, K1, K2 = x
+    iters, experiment, kp1_distorted, kp2_distorted, k1, k2, R_gt, t_gt, T1, T2, K1, K2, sarg = x
 
     solver = experiment.split('_')[0]
 
@@ -117,8 +117,15 @@ def eval_experiment(x):
 
     if solver == 'Feq':
         rd_vals = [0.0]
+        if sarg == 3:
+            rd_vals = [-0.9]
         if 's3' in experiment:
-            rd_vals = [0.0, -0.6, -1.2]
+            if sarg < 2:
+                rd_vals = [0.0, -0.6, -1.2]
+            elif sarg == 3:
+                rd_vals = [-0.6, -0.9, -1.2]
+            else:
+                raise ValueError
 
         start = perf_counter()
         F_cam, info = poselib.estimate_kFk(kp1_distorted, kp2_distorted, rd_vals, use_undistorted, False, ransac_dict,
@@ -314,17 +321,23 @@ def draw_results(results, experiments, iterations_list):
 
 def eval(args):
     if args.eq:
-        experiments = ['Feq_7pt', 'Feq_7pt_s3',
-                       'kFk_8pt', 'kFk_9pt',
-                       'k2k1_9pt', 'k2Fk1_10pt',
-                       'F_7pt', 'F_7pt_s3',
-                       'F_ns']
+        if args.synth != 2:
+            experiments = ['Feq_7pt', 'Feq_7pt_s3',
+                           'kFk_8pt', 'kFk_9pt',
+                           'k2k1_9pt', 'k2Fk1_10pt',
+                           'F_7pt', 'F_7pt_s3', 'F_ns']
+        else:
+            experiments = ['Feq_7pt', 'Feq_7pt_s3',
+                           'kFk_8pt', 'kFk_9pt',
+                           'k2k1_9pt', 'k2Fk1_10pt',
+                           'F_7pt', 'F_ns']
     else:
-        experiments = ['k2k1_9pt', 'k2Fk1_10pt',
-                       'F_7pt', 'F_7pt_s3',
-                       'Fns_7pt']
-
-    experiments = ['Fns_7pt']
+        if args.synth != 2:
+            experiments = ['k2k1_9pt', 'k2Fk1_10pt',
+                           'F_7pt', 'F_7pt_s3', 'Fns_7pt']
+        else:
+            experiments = ['k2k1_9pt', 'k2Fk1_10pt',
+                           'F_7pt', 'Fns_7pt']
 
     dataset_path = args.dataset_path
     basename = os.path.basename(dataset_path)
@@ -340,9 +353,9 @@ def eval(args):
 
     s_string = ""
     if args.synth:
-        s_string = "-synth"
+        s_string = f"-synth{args.synth}"
         if args.eq:
-            s_string = "-syntheq"
+            s_string = f"-syntheq{args.synth}"
     json_string = f'{basename}-{matches_basename}{s_string}.json'
 
     if args.load:
@@ -406,12 +419,26 @@ def eval(args):
                 kp2_normalized, T2 = normalize(kp2, w_dict[img_name_2], h_dict[img_name_2])
 
                 if args.synth:
-                    k1 = dist()[0]
-                    if args.eq:
-                        k2 = k1
+                    if args.synth == 1:
+                        k1 = dist()[0]
+                        if args.eq:
+                            k2 = k1
+                        else:
+                            k2 = dist()[0]
+                    elif args.synth == 2:
+                        k1 = - 0.2 * np.random.rand()
+                        if args.eq:
+                            k2 = k1
+                        else:
+                            k2 = - 0.2 * np.random.rand()
+                    elif args.synth == 3:
+                        k1 = - 0.5 - 1.2 * np.random.rand()
+                        if args.eq:
+                            k2 = k1
+                        else:
+                            k2 = - 0.5 - 1.2 * np.random.rand()
                     else:
-                        k2 = dist()[0]
-
+                        raise NotImplementedError
 
                     kp1_distorted = distort(kp1_normalized, k1)
                     kp2_distorted = distort(kp2_normalized, k2)
@@ -423,7 +450,7 @@ def eval(args):
 
                 for experiment in experiments:
                     for iterations in iterations_list:
-                        yield iterations, experiment, np.copy(kp1_distorted), np.copy(kp2_distorted), k1, k2, R_gt, t_gt, T1, T2, K1, K2
+                        yield iterations, experiment, np.copy(kp1_distorted), np.copy(kp2_distorted), k1, k2, R_gt, t_gt, T1, T2, K1, K2, args.synth
 
 
         total_length = len(experiments) * len(pairs) * len(iterations_list)
