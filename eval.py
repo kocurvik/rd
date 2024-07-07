@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument('-g', '--graph', action='store_true', default=False)
     parser.add_argument('-s', '--synth', action='store_true', default=False)
     parser.add_argument('-e', '--eq', action='store_true', default=False)
+    parser.add_argument('-a', '--append', action='store_true', default=False)
     parser.add_argument('feature_file')
     parser.add_argument('dataset_path')
 
@@ -145,7 +146,12 @@ def eval_experiment(x):
         F_est = F_cam.F
         k1_est = F_cam.camera1.params[-1]
         k2_est = F_cam.camera2.params[-1]
-        # k1_est = 0.0
+    elif solver == 'Fns':
+        start = perf_counter()
+        F_est, info = poselib.estimate_fundamental(kp1_distorted, kp2_distorted, ransac_dict, {'verbose': False, 'max_iterations': 100})
+        info['runtime'] = 1000 * (perf_counter() - start)
+        k1_est = 0.0
+        k2_est = 0.0
     elif solver == 'kFk':
         use_9pt = '9pt' in experiment
         start = perf_counter()
@@ -180,7 +186,7 @@ def print_results(experiments, results, eq_only=False):
                        'Pose AUC@5', 'Pose AUC@10', 'Pose AUC@20',
                        'median k err', 'mean k err',
                        'k AUC@0.05', 'k AUC@0.1' ,
-                       'median time', 'mean time'])
+                       'median time', 'mean time', 'median inliers', 'mean inliers'])
     tab.align["solver"] = "l"
     tab.float_format = '0.2'
 
@@ -215,7 +221,8 @@ def print_results(experiments, results, eq_only=False):
                      np.mean(p_res[:5]), np.mean(p_res[:10]), np.mean(p_res),
                      np.median(k_errs), np.mean(k_errs),
                      np.mean(k_res[:5]), np.mean(k_res[:10]),
-                     np.median(times), np.mean(times)])
+                     np.median(times), np.mean(times),
+                     np.median(inliers), np.mean(inliers)])
     print(tab)
 
     print('latex')
@@ -310,10 +317,14 @@ def eval(args):
         experiments = ['Feq_7pt', 'Feq_7pt_s3',
                        'kFk_8pt', 'kFk_9pt',
                        'k2k1_9pt', 'k2Fk1_10pt',
-                       'F_7pt', 'F_7pt_s3']
+                       'F_7pt', 'F_7pt_s3',
+                       'F_ns']
     else:
         experiments = ['k2k1_9pt', 'k2Fk1_10pt',
-                       'F_7pt', 'F_7pt_s3']
+                       'F_7pt', 'F_7pt_s3',
+                       'Fns_7pt']
+
+    experiments = ['Fns_7pt']
 
     dataset_path = args.dataset_path
     basename = os.path.basename(dataset_path)
@@ -401,6 +412,7 @@ def eval(args):
                     else:
                         k2 = dist()[0]
 
+
                     kp1_distorted = distort(kp1_normalized, k1)
                     kp2_distorted = distort(kp2_normalized, k2)
                 else:
@@ -425,6 +437,12 @@ def eval(args):
             results = [x for x in pool.imap(eval_experiment, tqdm(gen_data(), total=total_length))]
 
         os.makedirs('results', exist_ok=True)
+
+        if args.append:
+            print(f"Appending from: {os.path.join('results', json_string)}")
+            with open(os.path.join('results', json_string), 'r') as f:
+                prev_results = json.load(f)
+            results.extend(prev_results)
 
         with open(os.path.join('results', json_string), 'w') as f:
             json.dump(results, f)
