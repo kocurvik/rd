@@ -325,12 +325,13 @@ def eval(args):
             experiments = ['Feq_7pt', 'Feq_7pt_s3',
                            'kFk_8pt', 'kFk_9pt',
                            'k2k1_9pt', 'k2Fk1_10pt',
-                           'F_7pt', 'F_7pt_s3', 'F_ns']
+                           'F_7pt', 'F_7pt_s3', 'Fns_7pt']
         else:
             experiments = ['Feq_7pt', 'Feq_7pt_s3',
                            'kFk_8pt', 'kFk_9pt',
                            'k2k1_9pt', 'k2Fk1_10pt',
-                           'F_7pt', 'F_ns']
+                           'F_7pt', 'Fns_7pt']
+        # experiments = ['Fns_7pt']
     else:
         if args.synth != 2:
             experiments = ['k2k1_9pt', 'k2Fk1_10pt',
@@ -359,6 +360,7 @@ def eval(args):
     json_string = f'{basename}-{matches_basename}{s_string}.json'
 
     if args.load:
+        print("Loading: ", json_string)
         with open(os.path.join('results', json_string), 'r') as f:
             results = json.load(f)
 
