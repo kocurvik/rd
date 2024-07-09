@@ -327,7 +327,7 @@ def eval(args):
                            'k2k1_9pt', 'k2Fk1_10pt',
                            'F_7pt', 'F_7pt_s3', 'Fns_7pt']
         else:
-            experiments = ['Feq_7pt', 'Feq_7pt_s3',
+            experiments = ['Feq_7pt',
                            'kFk_8pt', 'kFk_9pt',
                            'k2k1_9pt', 'k2Fk1_10pt',
                            'F_7pt', 'Fns_7pt']
