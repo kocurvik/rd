@@ -140,8 +140,15 @@ def eval_experiment(x):
         k2_est = k1_est
     elif solver == 'F':
         rd_vals = [0.0]
+        if sarg == 3:
+            rd_vals = [-0.9]
         if 's3' in experiment:
-            rd_vals = [0.0, -0.6, -1.2]
+            if sarg < 2:
+                rd_vals = [0.0, -0.6, -1.2]
+            elif sarg == 3:
+                rd_vals = [-0.6, -0.9, -1.2]
+            else:
+                raise ValueError
 
         start = perf_counter()
         F_cam, info = poselib.estimate_k2Fk1(kp1_distorted, kp2_distorted, rd_vals, use_undistorted, False, ransac_dict,
