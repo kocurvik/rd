@@ -106,10 +106,10 @@ def get_rows(results, order):
 def generate_table(dataset, i, feat):
     if dataset == 'pt':
         basenames = basenames_pt
-        name = 'Phototourism'
+        name = '\\Phototourism'
     elif dataset == 'eth3d':
         basenames = basenames_eth
-        name = 'ETH3D'
+        name = '\\ETH'
     elif dataset == 'rotunda':
         basenames = ['rotunda_new']
         name = '\\ROTUNDA'
