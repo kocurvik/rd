@@ -10,12 +10,11 @@ import poselib
 from matplotlib import pyplot as plt
 from prettytable import PrettyTable
 from tqdm import tqdm
-import cv2
 
 from utils.geometry import rotation_angle, angle
-from utils.geometry import get_camera_dicts, undistort, distort, recover_pose_from_fundamental, bougnoux_original, \
-    get_K, pose_from_F
+from utils.geometry import get_camera_dicts, undistort, distort, pose_from_F
 from utils.rand import get_random_rd_distribution
+from utils.vis import draw_results_pose_auc_10
 
 
 def parse_args():
@@ -299,33 +298,6 @@ def draw_cumplots(experiments, results, eq_only=False):
     plt.show()
 
 
-def draw_results(results, experiments, iterations_list):
-    plt.figure()
-
-    for experiment in experiments:
-        experiment_results = [x for x in results if x['experiment'] == experiment]
-
-        xs = []
-        ys = []
-
-        for iterations in iterations_list:
-            iter_results = [x for x in experiment_results if x['info']['iterations'] == iterations]
-            mean_runtime = np.mean([x['info']['runtime'] for x in iter_results])
-            errs = np.array([r['P_err'] for r in iter_results])
-            errs[np.isnan(errs)] = 180
-            AUC10 = np.mean(np.array([np.sum(errs < t) / len(errs) for t in range(1, 11)]))
-
-            xs.append(mean_runtime)
-            ys.append(AUC10)
-
-        plt.semilogx(xs, ys, label=experiment, marker='*')
-
-    plt.xlabel('Mean runtime (ms)')
-    plt.ylabel('AUC@10$\\deg$')
-    plt.legend()
-    plt.show()
-
-
 def eval(args):
     if args.eq:
         if args.synth != 2:
@@ -435,11 +407,11 @@ def eval(args):
                         else:
                             k2 = dist()[0]
                     elif args.synth == 2:
-                        k1 = - 0.2 * np.random.rand()
+                        k1 = - 0.3 * np.random.rand()
                         if args.eq:
                             k2 = k1
                         else:
-                            k2 = - 0.2 * np.random.rand()
+                            k2 = - 0.3 * np.random.rand()
                     elif args.synth == 3:
                         k1 = - 0.5 - 1.2 * np.random.rand()
                         if args.eq:
@@ -494,7 +466,7 @@ def eval(args):
     # draw_cumplots(experiments, results, eq_only=True)
 
     if args.graph:
-        draw_results(results, experiments, iterations_list)
+        draw_results_pose_auc_10(results, experiments, iterations_list)
 
 if __name__ == '__main__':
     args = parse_args()
