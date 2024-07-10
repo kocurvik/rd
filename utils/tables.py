@@ -31,7 +31,7 @@ def table_text(dataset_name, eq_rows, neq_rows, sarg):
         f'    \\midrule\n'
         f'    & Minimal & Refinement & Sample & AVG $(^\\circ)$ $\\downarrow$ & MED $(^\\circ)$ $\\downarrow$ & AUC@5 $\\uparrow$ & @10 & @20 & AVG $\\epsilon(\\lambda)$ $\\downarrow$ & MED $\\epsilon(\\lambda)$ $\\downarrow$ & Time (ms) $\\downarrow$ \\\\\n'
         f'    \\midrule\n'
-        f'    \\multirow{{{len(eq_rows)}}}{{*}}{{\\rotatebox[origin=c]{{90}}{{GT $\\lambda_1 = \\lambda_2$}}}} '
+        f'    \\multirow{{{len(eq_rows)}}}{{*}}{{\\rotatebox[origin=c]{{90}}{{$\\lambda_1 = \\lambda_2$}}}} '
         f'    & 7pt \\F & \\F & {rd_val} & {eq_rows[0]} \\\\\n'
         f'    & 7pt \\F & \\Fk & {rd_val} & {eq_rows[1]} \\\\\n'
         f'    {comment}& 7pt \\F & \\Fk & $\\{{{rd_vals}\\}}$ & {eq_rows[2]} \\\\\n'
@@ -44,7 +44,7 @@ def table_text(dataset_name, eq_rows, neq_rows, sarg):
         f'    & 10pt \\Fkk & \\Fkk & \\ding{{55}} & {eq_rows[8]} \\\\ \n'
         f'    \\midrule\n'
         f'    \\midrule\n'
-        f'    \\multirow{{{len(neq_rows)}}}{{*}}{{\\rotatebox[origin=c]{{90}}{{GT $\\lambda_1 \\neq \\lambda_2$}}}} '
+        f'    \\multirow{{{len(neq_rows)}}}{{*}}{{\\rotatebox[origin=c]{{90}}{{$\\lambda_1 \\neq \\lambda_2$}}}} '
         f'    & 7pt \\F & \\F & {rd_val} & {neq_rows[0]} \\\\\n'
         f'    & 7pt \\F & \\Fkk & {rd_val} & {neq_rows[1]} \\\\\n'
         f'    {comment}& 7pt \\F & \\Fkk & $\\{{{rd_vals}}}$ & {neq_rows[2]} \\\\\n'
@@ -103,21 +103,32 @@ def get_rows(results, order):
 
     return [' & '.join(row) for row in text_rows]
 
-def generate_table(dataset, i):
+def generate_table(dataset, i, feat):
     if dataset == 'pt':
         basenames = basenames_pt
         name = 'Phototourism'
     elif dataset == 'eth3d':
         basenames = basenames_eth
         name = 'ETH3D'
+    elif dataset == 'rotunda':
+        basenames = ['rotunda_new']
+        name = '\\ROTUNDA'
+    elif dataset == 'vitus':
+        basenames = ['st_vitus_all']
+        name = '\\VITUS'
+
     else:
         raise ValueError
 
-    name = name + f' - Synth {"XABC"[i]}'
+    if i > 0:
+        name = name + f' - Synth {"XABC"[i]}'
 
-    neq_results_type = f'pairs-features_superpoint_noresize_2048-LG-synth{i}'
-    eq_results_type =  f'pairs-features_superpoint_noresize_2048-LG-syntheq{i}'
-
+    if i > 0:
+        neq_results_type = f'pairs-features_{feat}_noresize_2048-LG-synth{i}'
+        eq_results_type =  f'pairs-features_{feat}_noresize_2048-LG-syntheq{i}'
+    else:
+        neq_results_type = f'pairs-features_{feat}_noresize_2048-LG-synth{i}'
+        eq_results_type = f'pairs-features_{feat}_noresize_2048-LG-syntheq{i}'
     # results_type = 'graph-SIFT_triplet_correspondences'
 
     neq_results = []
@@ -146,6 +157,10 @@ def generate_table(dataset, i):
 
 if __name__ == '__main__':
     for i in range(1, 4):
-        generate_table('pt', i)
+        generate_table('pt', i, 'superpoint')
     for i in range(1, 4):
-        generate_table('eth3d', i)
+        generate_table('eth3d', i, 'superpoint')
+
+    for features in ['superpoint', 'sift']:
+        generate_table('rotunda', 0, features)
+        generate_table('vitus', 0, features)
