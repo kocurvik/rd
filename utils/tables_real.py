@@ -5,8 +5,8 @@ import numpy as np
 
 from utils.data import basenames_pt, basenames_eth
 
-eq_order = ['Fns_7pt', 'Feq_7pt', 'Feq_7pt_s3', 'kFk_8pt', 'kFk_9pt', 'F_7pt', 'F_7pt_s3', 'k2k1_9pt', 'k2Fk1_10pt']
-neq_order = ['Fns_7pt', 'F_7pt', 'F_7pt_s3', 'k2k1_9pt', 'k2Fk1_10pt']
+eq_order = ['Fns_7pt', 'fokFk_7pt', 'fok2Fk1_7pt', 'Feq_7pt', 'Feq_7pt_s3', 'kFk_8pt', 'kFk_9pt', 'F_7pt', 'F_7pt_s3', 'k2k1_9pt', 'k2Fk1_10pt']
+neq_order = ['Fns_7pt', 'fok2Fk1_7pt', 'F_7pt', 'F_7pt_s3', 'k2k1_9pt', 'k2Fk1_10pt']
 
 
 incdec = [1, 1, -1, -1, -1, 1, 1, 1]
@@ -16,20 +16,7 @@ def table_text(dataset_name, eq_rows, neq_rows, sarg):
     lneq = len(neq_rows)
 
     rd_val = '0'
-    if sarg == 3:
-        rd_val = '-0.9'
-    if sarg < 3:
-        rd_vals = '0.0, -0.6, -1.2'
-    elif sarg == 3:
-        rd_vals ='-0.6, -0.9, -1.2'
-    if sarg == 2:
-        comment = '%'
-        leq -= 2
-        lneq -= 1
-    else:
-        comment = ''
-
-
+    rd_vals = '0.0, -0.6, -1.2'
 
     table_f_string = (
         f'\\begin{{tabular}}{{ c | r c c | c c c c c | c c | c}}\n'
@@ -40,24 +27,27 @@ def table_text(dataset_name, eq_rows, neq_rows, sarg):
         f'    \\midrule\n'
         f'    \\multirow{{{leq}}}{{*}}{{\\rotatebox[origin=c]{{90}}{{$\\lambda_1 = \\lambda_2$}}}} '
         f'    & 7pt \\F & \\F & 0 & {eq_rows[0]} \\\\\n'
-        f'    & 7pt \\F & \\Fk & ${rd_val}$ & {eq_rows[1]} \\\\\n'
-        f'    {comment}& 7pt \\F & \\Fk & $\\{{{rd_vals}\\}}$ & {eq_rows[2]} \\\\\n'
-        f'    & 8pt \\Fk & \\Fk & \\ding{{55}} & {eq_rows[3]} \\\\\n'
-        f'    & 9pt \\Fk & \\Fk & \\ding{{55}} & {eq_rows[4]} \\\\\n'
-        f'    & 7pt \\F & \\Fkk & ${rd_val}$ & {eq_rows[5]} \\\\\n'
-        f'    {comment}& 7pt \\F & \\Fkk & $\\{{{rd_vals}\\}}$ & {eq_rows[6]} \\\\\n'
+        f'    & 7pt \\F & \\F + \\Fk & 0 & {eq_rows[1]} \\\\\n'
+        f'    & 7pt \\F & \\F + \\Fkk & 0 & {eq_rows[2]} \\\\\n'
+        f'    & 7pt \\F & \\Fk & ${rd_val}$ & {eq_rows[3]} \\\\\n'
+        f'    & 7pt \\F & \\Fk & $\\{{{rd_vals}\\}}$ & {eq_rows[4]} \\\\\n'
+        f'    & 8pt \\Fk & \\Fk & \\ding{{55}} & {eq_rows[5]} \\\\\n'
+        f'    & 9pt \\Fk & \\Fk & \\ding{{55}} & {eq_rows[6]} \\\\\n'
+        f'    & 7pt \\F & \\Fkk & ${rd_val}$ & {eq_rows[7]} \\\\\n'
+        f'    & 7pt \\F & \\Fkk & $\\{{{rd_vals}\\}}$ & {eq_rows[8]} \\\\\n'
         f'    %\\cmidrule{{2-12}}\n'
-        f'    & 9pt \\Fkk & \\Fkk & \\ding{{55}} & {eq_rows[7]} \\\\\n'
-        f'    & 10pt \\Fkk & \\Fkk & \\ding{{55}} & {eq_rows[8]} \\\\ \n'
+        f'    & 9pt \\Fkk & \\Fkk & \\ding{{55}} & {eq_rows[9]} \\\\\n'
+        f'    & 10pt \\Fkk & \\Fkk & \\ding{{55}} & {eq_rows[10]} \\\\ \n'
         f'    \\midrule\n'
         f'    \\midrule\n'
         f'    \\multirow{{{lneq}}}{{*}}{{\\rotatebox[origin=c]{{90}}{{$\\lambda_1 \\neq \\lambda_2$}}}} '
         f'    & 7pt \\F & \\F & 0 & {neq_rows[0]} \\\\\n'
-        f'    & 7pt \\F & \\Fkk & ${rd_val}$ & {neq_rows[1]} \\\\\n'
-        f'    {comment}& 7pt \\F & \\Fkk & $\\{{{rd_vals}\\}}$ & {neq_rows[2]} \\\\\n'
+        f'    & 7pt \\F & \\F + \\Fkk & 0 & {neq_rows[1]} \\\\\n'
+        f'    & 7pt \\F & \\Fkk & ${rd_val}$ & {neq_rows[2]} \\\\\n'
+        f'    & 7pt \\F & \\Fkk & $\\{{{rd_vals}\\}}$ & {neq_rows[3]} \\\\\n'
         f'    %\\cmidrule{{2-12}}\n'
-        f'    & 9pt \\Fkk & \\Fkk & \\ding{{55}} & {neq_rows[3]} \\\\\n'
-        f'    & 10pt \\Fkk & \\Fkk & \\ding{{55}} & {neq_rows[4]} \\\\ \n'
+        f'    & 9pt \\Fkk & \\Fkk & \\ding{{55}} & {neq_rows[4]} \\\\\n'
+        f'    & 10pt \\Fkk & \\Fkk & \\ding{{55}} & {neq_rows[5]} \\\\ \n'
         f'    \\bottomrule\n'
         f'\\end{{tabular}}'
     )
@@ -166,8 +156,3 @@ if __name__ == '__main__':
     for features in ['superpoint', 'sift']:
         generate_table('rotunda', 0, features)
         generate_table('vitus', 0, features)
-
-    for i in range(1, 4):
-        generate_table('pt', i, 'superpoint')
-    for i in range(1, 4):
-        generate_table('eth3d', i, 'superpoint')
