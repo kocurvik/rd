@@ -47,7 +47,7 @@ def table_text(dataset_name, eq_rows, neq_rows, sarg):
         f'    \\multirow{{{len(neq_rows)}}}{{*}}{{\\rotatebox[origin=c]{{90}}{{$\\lambda_1 \\neq \\lambda_2$}}}} '
         f'    & 7pt \\F & \\F & {rd_val} & {neq_rows[0]} \\\\\n'
         f'    & 7pt \\F & \\Fkk & {rd_val} & {neq_rows[1]} \\\\\n'
-        f'    {comment}& 7pt \\F & \\Fkk & $\\{{{rd_vals}}}$ & {neq_rows[2]} \\\\\n'
+        f'    {comment}& 7pt \\F & \\Fkk & $\\{{{rd_vals}\\}}$ & {neq_rows[2]} \\\\\n'
         f'    %\\cmidrule{{2-12}}\n'
         f'    & 9pt \\Fkk & \\Fkk & \\ding{{55}} & {neq_rows[3]} \\\\\n'
         f'    & 10pt \\Fkk & \\Fkk & \\ding{{55}} & {neq_rows[4]} \\\\ \n'
