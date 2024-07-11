@@ -165,6 +165,14 @@ def eval_experiment(x):
         info['runtime'] = 1000 * (perf_counter() - start)
         k1_est = 0.0
         k2_est = 0.0
+    elif solver == 'fokFk':
+        start = perf_counter()
+        F_cam, info = poselib.estimate_kFk_final_only(kp1_distorted, kp2_distorted, use_undistorted, ransac_dict,
+                                                      {'verbose': False, 'max_iterations': 100})
+        info['runtime'] = 1000 * (perf_counter() - start)
+        F_est = F_cam.F
+        k1_est = F_cam.camera.params[-1]
+        k2_est = k1_est
     elif solver == 'kFk':
         use_9pt = '9pt' in experiment
         start = perf_counter()
@@ -174,6 +182,14 @@ def eval_experiment(x):
         F_est = F_cam.F
         k1_est = F_cam.camera.params[-1]
         k2_est = k1_est
+    elif solver == 'fok2Fk1':
+        start = perf_counter()
+        F_cam, info = poselib.estimate_k2Fk1_final_only(kp1_distorted, kp2_distorted, use_undistorted, ransac_dict,
+                                                        {'verbose': False, 'max_iterations': 100})
+        info['runtime'] = 1000 * (perf_counter() - start)
+        F_est = F_cam.F
+        k1_est = F_cam.camera1.params[-1]
+        k2_est = F_cam.camera2.params[-1]
     else: # solver == 'k2Fk1'
         use_10pt = '10pt' in experiment
         start = perf_counter()
@@ -310,7 +326,7 @@ def eval(args):
                            'kFk_8pt', 'kFk_9pt',
                            'k2k1_9pt', 'k2Fk1_10pt',
                            'F_7pt', 'Fns_7pt']
-        # experiments = ['Fns_7pt']
+        experiments = ['fokFk_7pt', 'fok2Fk1_7pt']
     else:
         if args.synth != 2:
             experiments = ['k2k1_9pt', 'k2Fk1_10pt',
@@ -318,6 +334,8 @@ def eval(args):
         else:
             experiments = ['k2k1_9pt', 'k2Fk1_10pt',
                            'F_7pt', 'Fns_7pt']
+
+        experiments = ['fok2Fk1_7pt']
 
     dataset_path = args.dataset_path
     basename = os.path.basename(dataset_path)

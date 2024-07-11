@@ -154,7 +154,7 @@ def run_synth():
 
     for sigma in sigmas:
         for _ in tqdm(range(10)):
-            x1, x2, X = get_scene(f, k1, k2, R, t, 100)
+            x1, x2, X = get_scene(f, k1, k2, R, t, 100, width=1, height=1)
 
             xx1 = x1 + sigma * np.random.randn(*(x1.shape)) / 1000
             xx2 = x2 + sigma * np.random.randn(*(x1.shape)) / 1000
@@ -171,7 +171,7 @@ def run_synth():
                 print("xx2 NaN")
 
             camera_dict =  {'model': 'SIMPLE_PINHOLE', 'width': 640, 'height': 480, 'params': [f, 0, 0]}
-            ransac_dict = {'max_iterations': 1000, 'max_epipolar_error': 2.0, 'progressive_sampling': False, 'min_iterations': 10}
+            ransac_dict = {'max_iterations': 1000, 'max_epipolar_error': 2.0/1000, 'progressive_sampling': False, 'min_iterations': 1000}
 
             # image_pair, out = poselib.estimate_rd_shared_focal_relative_pose(xx1, xx2,np.array([0.0, 0.0]), rd_vals, ransac_dict, {'verbose': False})
             # image_pair, out = poselib.estimate_rd_shared_focal_relative_pose(xx1, xx2,np.array([0.0, 0.0]), [], ransac_dict, {'verbose': False})
@@ -182,16 +182,23 @@ def run_synth():
 
             # F_cam, out = poselib.estimate_kFk(xx1, xx2, rd_vals, use_undistorted, use_9pt, ransac_dict,
             #                                          {'verbose': False, 'max_iterations': 100})
+            # F_cam, out = poselib.estimate_kFk_final_only(xx1, xx2, use_undistorted, ransac_dict,
+            #                                          {'verbose': False, 'max_iterations': 100})
+            #
             # F = F_cam.F
             # kk1 = F_cam.camera.params[-1]
             # kk2 = kk1
+            # print(out['inlier_ratio'])
 
 
-            F_cam_pair, out = poselib.estimate_k2Fk1(xx1, xx2, rd_vals, use_undistorted, use_9pt, ransac_dict, {'verbose': False, 'max_iterations':1000})
+            # F_cam_pair, out = poselib.estimate_k2Fk1(xx1, xx2, rd_vals, use_undistorted, use_9pt, ransac_dict, {'verbose': False, 'max_iterations':1000})
+            F_cam_pair, out = poselib.estimate_k2Fk1_final_only(xx1, xx2, use_undistorted, ransac_dict, {'verbose': False, 'max_iterations':1000})
 
             F = F_cam_pair.F
             kk1 = F_cam_pair.camera1.params[3]
             kk2 = F_cam_pair.camera2.params[3]
+
+            # F = poselib.estimate_fundamental(xx1, xx2,)
 
             E_est = gt_K.T @ F @ gt_K
             R1, R2, _ = cv2.decomposeEssentialMat(E_est)
