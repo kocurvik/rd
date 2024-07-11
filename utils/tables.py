@@ -135,7 +135,7 @@ def generate_table(dataset, i, feat):
         eq_results_type =  f'pairs-features_{feat}_noresize_2048-LG-syntheq{i}'
     else:
         neq_results_type = f'pairs-features_{feat}_noresize_2048-LG'
-        eq_results_type = f'pairs-features_{feat}_noresize_2048-LG'
+        eq_results_type = f'pairs-features_{feat}_noresize_2048-LG_eq'
     # results_type = 'graph-SIFT_triplet_correspondences'
 
     neq_results = []
