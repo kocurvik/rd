@@ -74,10 +74,10 @@ def get_rows(results, order):
         p_avg = np.mean(p_errs)
         p_med = np.median(p_errs)
 
-        k_errs = [np.abs(r['k1'] - r['k1_gt']) for r in exp_results]
-        k_errs.extend([np.abs(r['k2'] - r['k2_gt']) for r in exp_results])
-        k_errs = np.array(k_errs)
-        k_errs[np.isnan(k_errs)] = 2.0
+        k_errs = np.array([0.5 * (np.abs(r['k1'] - r['k1_gt']) + np.aps(r['k2'] - r['k2_gt'])) for r in exp_results])
+        # k_errs.extend([np.abs(r['k2'] - r['k2_gt']) for r in exp_results])
+        # k_errs = np.array(k_errs)
+        k_errs[np.isnan(k_errs)] = 4.0
         k_avg = np.mean(k_errs)
         k_med = np.median(k_errs)
 
