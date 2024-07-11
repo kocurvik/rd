@@ -2,6 +2,7 @@ import json
 import os
 
 import numpy as np
+import seaborn as sns
 from matplotlib import pyplot as plt
 
 from utils.data import experiments, iterations_list, colors
@@ -9,6 +10,20 @@ from utils.data import experiments, iterations_list, colors
 large_size = 20
 small_size = 16
 
+print(colors)
+
+print(sns.color_palette("tab10").as_hex())
+
+
+
+
+# import matplotlib.font_manager as fm
+# print(sorted(fm.get_font_names()))
+# font = {'fontname' : 'Latin Modern Math'}
+# plt.rcParams.update({
+#     "text.usetex": True
+# })
+font = {}
 
 def draw_results_pose_auc_10(results, experiments, iterations_list, title=None):
     plt.figure(frameon=False)
@@ -32,13 +47,15 @@ def draw_results_pose_auc_10(results, experiments, iterations_list, title=None):
         plt.semilogx(xs, ys, label=experiment, marker='*', color=colors[experiment])
 
     plt.xlim([5.0, 1.9e4])
-    plt.xlabel('Mean runtime (ms)', fontsize=large_size)
-    plt.ylabel('AUC@10$^\\circ$', fontsize=large_size)
+    plt.xlabel('Mean runtime (ms)', fontsize=large_size, **font)
+    plt.ylabel('AUC@10$^\\circ$', fontsize=large_size, **font)
     plt.tick_params(axis='x', which='major', labelsize=small_size)
     plt.tick_params(axis='y', which='major', labelsize=small_size)
     if title is not None:
+        # plt.legend()
         plt.savefig(f'figs/{title}_pose.pdf', bbox_inches='tight', pad_inches=0)
         print(f'saved pose: {title}')
+
     else:
         plt.legend()
         plt.show()
@@ -56,24 +73,27 @@ def draw_results_k_med(results, experiments, iterations_list, title=None):
         for iterations in iterations_list:
             iter_results = [x for x in experiment_results if x['info']['iterations'] == iterations]
             mean_runtime = np.mean([x['info']['runtime'] for x in iter_results])
-            errs = [np.abs(r['k1'] - r['k1_gt']) for r in iter_results]
-            errs.extend([np.abs(r['k2'] - r['k2_gt']) for r in iter_results])
-            errs = np.array(errs)
-            errs[np.isnan(errs)] = 1.0
-            med = np.median(errs)
+            errs = np.array([0.5 * (np.abs(r['k1'] - r['k1_gt']) + np.abs(r['k2'] - r['k2_gt'])) for r in iter_results])
+            # errs.extend([np.abs(r['k2'] - r['k2_gt']) for r in iter_results])
+            # errs = np.array(errs)
+            errs[np.isnan(errs)] = 2.0
+            med = np.mean(errs)
 
             xs.append(mean_runtime)
             ys.append(med)
 
         plt.semilogx(xs, ys, label=experiment, marker='*', color=colors[experiment])
 
-    plt.xlabel('Mean runtime (ms)', fontsize=large_size)
-    plt.ylabel('Median absolute $\\lambda$ error', fontsize=large_size)
-    plt.ylim([0.0, 0.3])
+    plt.xlabel('Mean runtime (ms)', fontsize=large_size, **font)
+    # plt.ylabel('Median absolute $\\lambda$ error', fontsize=large_size)
+    # plt.ylabel('Mean $\\epsilon(\\lambda)$', fontsize=large_size, **font)
+    plt.ylabel('Mean ε(λ)', fontsize=large_size, **font)
+    plt.ylim([0.0, 0.8])
     plt.xlim([5.0, 1.9e4])
     plt.tick_params(axis='x', which='major', labelsize=small_size)
     plt.tick_params(axis='y', which='major', labelsize=small_size)
     if title is not None:
+        # plt.legend()
         plt.savefig(f'figs/{title}_k.pdf', bbox_inches='tight', pad_inches=0)
         print(f'saved k: {title}')
     else:
