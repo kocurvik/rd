@@ -36,8 +36,8 @@ python prepare_bundler.py -f superpoint /path/to/stored_matches/rotunda_new /pat
 # generates only matches with the same camera in both views
 python prepare_bundler.py -f superpoint -e /path/to/stored_matches/rotunda_new /path/to/dataset/rotunda_new
 
-python prepare_bundler.py -f superpoint /path/to/stored_matches/cathedral /path/to/dataset/cathedral
-python prepare_bundler.py -f superpoint -e /path/to/stored_matches/cathedral /path/to/dataset/cathedral
+python prepare_bundler.py -n 10000 -f superpoint /path/to/stored_matches/cathedral /path/to/dataset/cathedral
+python prepare_bundler.py -n 10000 -f superpoint -e /path/to/stored_matches/cathedral /path/to/dataset/cathedral
 
 python prepare_im.py -f superpoint /path/to/stored_matches/ETH3D/multiview_undistorted /path/to/dataset/ETH3D/multiview_undistorted
 python prepare_im.py -f superpoint -n 5000 /path/to/stored_matches/phototourism /path/to/dataset/phototourism/
