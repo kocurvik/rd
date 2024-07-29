@@ -47,8 +47,6 @@ python prepare_im.py -f superpoint -n 5000 /path/to/stored_matches/phototourism 
 
 You can change the features to SIFT by setting `-f sift`. You can choose any `/path/to/stored_matches/` it can also be the same as the original dataset directory.
 
-
-
 ### Running experiments
 
 To run the experiments you should modify `experiments.sh` as described in the script comments and run it.
