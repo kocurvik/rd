@@ -23,7 +23,7 @@ We use four datasets:
 * Rotunda - download TBA
 * Cathedral - download TBA
 * Phototourism - download from the [IMC2020 challenge website](https://www.cs.ubc.ca/~kmyi/imw2020/data.html)
-* ETH3D - download the multiview undistorted test data from the [dataset website](https://www.eth3d.net/datasets#high-res-multi-view-test-data).
+* ETH3D - download the multiview undistorted train data from the [dataset website](https://www.eth3d.net/datasets#high-res-multi-view-training-data).
 
 ### Extracting matches
 
@@ -44,6 +44,8 @@ python prepare_im.py -f superpoint -n 5000 /path/to/stored_matches/phototourism 
 ```
 
 You can change the features to SIFT by setting `-f sift`. You can choose any `/path/to/stored_matches/` it can also be the same as the original dataset directory.
+
+You may also just download the files with the [matches](https://cogsci.dai.fmph.uniba.sk/~kocur/rd_all_matches.tar.gz).
 
 ### Running experiments
 
