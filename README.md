@@ -27,7 +27,9 @@ We use four datasets:
 
 ### Extracting matches
 
-Matches can be extracted using `prepare_im.py` and `prepare_bundler.py`.
+You can download the files with the [matches](http://cogsci.dai.fmph.uniba.sk/~kocur/rd_all_matches.tar.gz).
+
+If you want to extract them yourself you can use `prepare_im.py` and `prepare_bundler.py`.
 
 To prepare matches for all datasets you can run:
 ```shell
@@ -45,7 +47,7 @@ python prepare_im.py -f superpoint -n 5000 /path/to/stored_matches/phototourism 
 
 You can change the features to SIFT by setting `-f sift`. You can choose any `/path/to/stored_matches/` it can also be the same as the original dataset directory.
 
-You may also just download the files with the [matches](http://cogsci.dai.fmph.uniba.sk/~kocur/rd_all_matches.tar.gz).
+
 
 ### Running experiments
 
