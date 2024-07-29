@@ -110,9 +110,9 @@ def generate_table(dataset, i, feat):
     elif dataset == 'rotunda':
         basenames = ['rotunda_new']
         name = '\\ROTUNDA'
-    elif dataset == 'vitus':
-        basenames = ['st_vitus_all']
-        name = '\\VITUS'
+    elif dataset == 'cathedral':
+        basenames = ['cathedral']
+        name = '\\CATHEDRAL'
 
     else:
         raise ValueError
@@ -155,4 +155,4 @@ def generate_table(dataset, i, feat):
 if __name__ == '__main__':
     for features in ['superpoint', 'sift']:
         generate_table('rotunda', 0, features)
-        generate_table('vitus', 0, features)
+        generate_table('cathedral', 0, features)

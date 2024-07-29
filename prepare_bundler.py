@@ -482,7 +482,7 @@ def get_paths(dataset_path):
         rc_path = os.path.join(dataset_path, 'project.rcproj')
         img_path = os.path.join(dataset_path, 'images_all')
         img_list_path = None
-    elif basename == 'st_vitus_all':
+    elif basename == 'cathedral':
         bundler_path = os.path.join(dataset_path, 'st_vitus_component_2_viktor.out')
         rc_path = os.path.join(dataset_path, 'rc.rcproj')
         img_path = os.path.join(dataset_path, 'images')

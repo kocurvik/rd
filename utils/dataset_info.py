@@ -11,7 +11,7 @@ def get_ks(path):
 
 
 if __name__ == '__main__':
-    paths = ['/mnt/d/Research/data/RD/rotunda_new/parameters_rd.h5', '/mnt/d/Research/data/RD/st_vitus_all/parameters_rd.h5',]
+    paths = ['/mnt/d/Research/data/RD/rotunda_new/parameters_rd.h5', '/mnt/d/Research/data/RD/cathedral/parameters_rd.h5',]
     for path in paths:
         ks = get_ks(path)
         print(len(ks))
@@ -29,6 +29,6 @@ if __name__ == '__main__':
     plt.xticks(bins)
     plt.tick_params(axis='x', which='major', labelsize=small_size)
     plt.tick_params(axis='y', which='major', labelsize=small_size)
-    plt.savefig('figs/vitus_hist.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('figs/cathedral_hist.pdf', bbox_inches='tight', pad_inches=0)
     plt.show()
 
