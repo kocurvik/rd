@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 
 from utils.data import experiments, iterations_list, colors
 
-large_size = 20
-small_size = 16
+large_size = 24
+small_size = 20
 
 print(colors)
 
