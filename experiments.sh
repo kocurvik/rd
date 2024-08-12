@@ -22,17 +22,17 @@ for sarg in $( seq 2 2); do
 done
 
 # rotunda
-python eval.py -a -nw 64 -e /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/rotunda_new
-python eval.py -a -nw 64 /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/rotunda_new
+python eval.py -nw 64 -e /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/rotunda_new
+python eval.py -nw 64 /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/rotunda_new
 
 # rotunda graph
-python eval.py -a -nw 64 -g -e /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/rotunda_new
-python eval.py -a -nw 64 -g /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/rotunda_new
+python eval.py -nw 64 -g -e /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/rotunda_new
+python eval.py -nw 64 -g /path/to/stored_matches/rotunda_new/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/rotunda_new
 
 # cathedral
-python eval.py -a -nw 64 -e /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/cathedral
-python eval.py -a -nw 64 /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/cathedral
+python eval.py -nw 64 -e /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/cathedral
+python eval.py -nw 64 /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/cathedral
 
 # cathedral
-python eval.py -a -nw 64 -g -e /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/cathedral
-python eval.py -a -nw 64 -g /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/cathedral
+python eval.py -nw 64 -g -e /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG_eq /path/to/stored_matches/cathedral
+python eval.py -nw 64 -g /path/to/stored_matches/cathedral/pairs-features_superpoint_noresize_2048-LG /path/to/stored_matches/cathedral
