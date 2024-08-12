@@ -326,6 +326,7 @@ def eval(args):
                            'kFk_8pt', 'kFk_9pt',
                            'k2k1_9pt', 'k2Fk1_10pt',
                            'F_7pt', 'Fns_7pt']
+        experiments = ['fokFk_7pt', 'fok2Fk1_7pt']
     else:
         if args.synth != 2:
             experiments = ['k2k1_9pt', 'k2Fk1_10pt',
@@ -333,6 +334,8 @@ def eval(args):
         else:
             experiments = ['k2k1_9pt', 'k2Fk1_10pt',
                            'F_7pt', 'Fns_7pt']
+
+        experiments = ['fok2Fk1_7pt']
 
     dataset_path = args.dataset_path
     basename = os.path.basename(dataset_path)
