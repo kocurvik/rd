@@ -14,7 +14,7 @@ git checkout rd
 pip install .
 ```
 
-Before running the python scripts make sure that the repo is in your python path (e.g. `export PYTHONPATH=/path/to/repo/solvers_rd`)
+Before running the python scripts make sure that the repo is in your python path (e.g. `export PYTHONPATH=/path/to/repo/rd`)
 
 ## Running experiments
 
