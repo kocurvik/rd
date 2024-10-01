@@ -2,6 +2,10 @@
 
 This repo contains code for paper "Are Minimal Radial Distortion Solvers Necessary for Relative Pose Estimation?" (arxiv: TBA, doi: TBA)
 
+## Update - PoseLib integration
+
+The best performing solvers including the proposed sampling solvers have been merged into the [official PoseLib dev branch](https://github.com/PoseLib/PoseLib/tree/dev).
+
 ## Installation
 
 Create an environment with pytorch and packaged from `requirements.txt`.
