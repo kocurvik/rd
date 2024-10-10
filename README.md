@@ -22,7 +22,7 @@ Before running the python scripts make sure that the repo is in your python path
 
 ## GC-RANSAC implementation 
 
-Our implementation of the solver in GC-RANSAC can be found in https://github.com/CharalamposTzamos/radial-distortion-solvers
+Our implementation of the solvers in GC-RANSAC can be found in https://github.com/CharalamposTzamos/radial-distortion-solvers
 
 ## Running experiments
 
