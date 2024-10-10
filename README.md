@@ -20,6 +20,10 @@ pip install .
 
 Before running the python scripts make sure that the repo is in your python path (e.g. `export PYTHONPATH=/path/to/repo/rd`)
 
+## GC-RANSAC implementation 
+
+Our implementation of the solver in GC-RANSAC can be found in https://github.com/CharalamposTzamos/radial-distortion-solvers
+
 ## Running experiments
 
 ### Datasets
