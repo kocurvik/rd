@@ -1,6 +1,6 @@
 # Evaluation of radial distortion solvers
 
-This repo contains code for paper "Are Minimal Radial Distortion Solvers Necessary for Relative Pose Estimation?" (arxiv: TBA, doi: TBA)
+This repo contains code for paper "Are Minimal Radial Distortion Solvers Necessary for Relative Pose Estimation?" (arxiv: http://arxiv.org/abs/2410.05984, doi: TBA)
 
 ## Update - PoseLib integration
 
