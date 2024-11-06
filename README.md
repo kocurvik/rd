@@ -28,7 +28,7 @@ Our implementation of the solvers in GC-RANSAC can be found in https://github.co
 
 ### Datasets
 We use four datasets:
-* Rotunda and Cathedral - [RD Benchmark][https://drive.google.com/drive/folders/1XmCglJMU1s6jDq5KcHmo5w2fH6ZTlj6y?usp=drive_link]
+* Rotunda and Cathedral - [RD Benchmark](https://drive.google.com/drive/folders/1XmCglJMU1s6jDq5KcHmo5w2fH6ZTlj6y?usp=drive_link)
 * Phototourism - download from the [IMC2020 challenge website](https://www.cs.ubc.ca/~kmyi/imw2020/data.html)
 * ETH3D - download the multiview undistorted train data from the [dataset website](https://www.eth3d.net/datasets#high-res-multi-view-training-data).
 
