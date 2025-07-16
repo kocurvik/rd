@@ -64,6 +64,8 @@ Tables and figures are generated using `utils/tables.py`, `utils/tables_real.py`
 
 ## Citation
 
+If you find our work useful in your research please consider citing our publication:
+
 ```bibtex
 @InProceedings{10.1007/978-3-031-91569-7_7,
   author="Tzamos, Charalambos
