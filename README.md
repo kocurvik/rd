@@ -1,6 +1,6 @@
 # Evaluation of radial distortion solvers
 
-This repo contains code for paper "Are Minimal Radial Distortion Solvers Necessary for Relative Pose Estimation?" (arxiv: http://arxiv.org/abs/2410.05984, doi: TBA)
+This repo contains code for paper "Are Minimal Radial Distortion Solvers Necessary for Relative Pose Estimation?" (arxiv: http://arxiv.org/abs/2410.05984, doi: https://doi.org/10.1007/978-3-031-91569-7_7)
 
 ## Update - PoseLib integration
 
@@ -64,7 +64,7 @@ Tables and figures are generated using `utils/tables.py`, `utils/tables_real.py`
 
 ## Citation
 
-```shell
+```bibtex
 @InProceedings{10.1007/978-3-031-91569-7_7,
 author="Tzamos, Charalambos
 and Kocur, Viktor
