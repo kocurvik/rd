@@ -66,22 +66,22 @@ Tables and figures are generated using `utils/tables.py`, `utils/tables_real.py`
 
 ```bibtex
 @InProceedings{10.1007/978-3-031-91569-7_7,
-author="Tzamos, Charalambos
-and Kocur, Viktor
-and Ding, Yaqing
-and Sattler, Torsten
-and Kukelova, Zuzana",
-editor="Del Bue, Alessio
-and Canton, Cristian
-and Pont-Tuset, Jordi
-and Tommasi, Tatiana",
-title="Are Minimal Radial Distortion Solvers Necessary for Relative Pose Estimation?",
-booktitle="Computer Vision -- ECCV 2024 Workshops",
-year="2025",
-publisher="Springer Nature Switzerland",
-address="Cham",
-pages="91--107",
-isbn="978-3-031-91569-7"
+  author="Tzamos, Charalambos
+  and Kocur, Viktor
+  and Ding, Yaqing
+  and Sattler, Torsten
+  and Kukelova, Zuzana",
+  editor="Del Bue, Alessio
+  and Canton, Cristian
+  and Pont-Tuset, Jordi
+  and Tommasi, Tatiana",
+  title="Are Minimal Radial Distortion Solvers Necessary for Relative Pose Estimation?",
+  booktitle="Computer Vision -- ECCV 2024 Workshops",
+  year="2025",
+  publisher="Springer Nature Switzerland",
+  address="Cham",
+  pages="91--107",
+  isbn="978-3-031-91569-7"
 }
 ```
 
