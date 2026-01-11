@@ -34,7 +34,7 @@ We use four datasets:
 
 ### Extracting matches
 
-You can download the files with the [matches](http://cogsci.dai.fmph.uniba.sk/~kocur/rd_all_matches.tar.gz).
+You can download the files with the [matches](http://cogsci.dai.fmph.uniba.sk/~kocur/rd_all_matches.tar.gz) ([mirror](https://415102.xyz/api/public/dl/_-txPy5Y)).
 
 If you want to extract them yourself you can use `prepare_im.py` and `prepare_bundler.py`.
 
